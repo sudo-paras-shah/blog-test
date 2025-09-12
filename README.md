@@ -1,2 +1,2 @@
 # blog-test
-Just a testing for a blog website
+Just testing for a blog website

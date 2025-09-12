@@ -1,0 +1,29 @@
+{
+  "name": "blog-test",
+  "version": "1.0.0",
+  "description": "Just testing for a blog website",
+  "main": "api/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node api/server.js",
+    "dev": "nodemon api/server.js",
+    "build": "echo \"No build required\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sudo-paras-shah/blog-test.git"
+  },
+  "author": "Paras Shah",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sudo-paras-shah/blog-test/issues"
+  },
+  "homepage": "https://github.com/sudo-paras-shah/blog-test#readme",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
