@@ -1,4 +1,7 @@
 import express from "express";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 const PORT = 3000;
@@ -16,15 +19,14 @@ app.use((req, res, next) => {
 	);
 	next();
 });
-
-app.use(express.json());
+app.use(express.static(path.join(__dirname, '../public')));
 
 app.get('/', (req, res) => {
-    res.render('index.ejs');
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 app.get('/blog', (req, res) => {
-    res.render('blog.ejs');
+    res.sendFile(path.join(__dirname, '../public/blog.html'));
 });
 
 app.listen(PORT, () => {
