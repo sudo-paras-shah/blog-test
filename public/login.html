@@ -4,8 +4,97 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login/Register</title>
+        <style>
+            /* Container */
+            .login-container {
+                max-width: 400px;
+                margin: 80px auto;
+                padding: 40px 30px;
+                background: #fff;
+                border-radius: 10px;
+                box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+            }
+
+            /* Title */
+            .login-title {
+                text-align: center;
+                margin-bottom: 25px;
+                font-size: 26px;
+                font-weight: 600;
+                color: #222;
+            }
+
+            /* Form */
+            .login-form .form-group {
+                margin-bottom: 20px;
+            }
+
+            .login-form label {
+                display: block;
+                margin-bottom: 6px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #333;
+            }
+
+            .login-form input {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 15px;
+                transition: border 0.2s ease;
+            }
+
+            .login-form input:focus {
+                outline: none;
+                border-color: #0077ff;
+                box-shadow: 0 0 0 2px rgba(0,119,255,0.2);
+            }
+
+            /* Button */
+            .login-btn {
+                width: 100%;
+                padding: 12px;
+                background: #0077ff;
+                border: none;
+                border-radius: 6px;
+                font-size: 16px;
+                font-weight: 600;
+                color: #fff;
+                cursor: pointer;
+                transition: background 0.2s ease;
+            }
+
+            .login-btn:hover {
+                background: #005fcc;
+            }
+
+            /* Responsive */
+            @media screen and (max-width: 480px) {
+                .login-container {
+                    margin: 40px 15px;
+                    padding: 30px 20px;
+                }
+            }
+        </style>
     </head>
     <body>
-        
+        <div class="login-container">
+            <h2 class="login-title">Login</h2>
+            <form class="login-form" action="/api/login" method="POST">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required/>
+                </div>
+
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+        </div>
     </body>
 </html>
