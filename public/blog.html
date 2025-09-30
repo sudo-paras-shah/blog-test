@@ -6,8 +6,42 @@
         <title>Blog</title>
     </head>
     <body>
-        <a href="login.html">Login</a> <br>
-        <a href="profile.html">Profile Page</a> <br>
-        <a href="/api/logout">Logout</a> <br>
+        <nav>
+            <a id="login-link" href="/login">Login</a>
+
+            <span id="user-profile" style="display:none;">
+                Welcome, <span id="user-email"></span>! </br>
+                <a href="/profile">Profile Page</a> </br>
+                <a href="/api/logout">Logout</a>
+            </span>
+        </nav>
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                try {
+                    const response = await fetch('/api/auth/status');
+                    const data = await response.json();
+
+                    const loginLink = document.getElementById('login-link');
+                    const userProfile = document.getElementById('user-profile');
+                    const userEmail = document.getElementById('user-email');
+
+                    if (data.isLoggedIn) {
+                        loginLink.style.display = 'none';
+                        userProfile.style.display = 'block';
+                        userEmail.textContent = data.email;
+
+                    } else {
+                        loginLink.style.display = 'block';
+                        userProfile.style.display = 'none';
+                    }
+
+                } catch (error) {
+                    console.error('Error checking auth status:', error);
+                    document.getElementById('login-link').style.display = 'block';
+                    document.getElementById('user-profile').style.display = 'none';
+                }
+            });
+        </script>
     </body>
 </html>

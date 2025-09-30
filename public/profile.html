@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <style>
+        /* --- Basic Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        
+        /* --- Form Styling --- */
+        form {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 2rem;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box; /* Important for padding */
+        }
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        /* --- Posts List Styling --- */
+        .post-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fafafa;
+        }
+        .post-card h3 {
+            margin-top: 0;
+        }
+        .post-card-actions {
+            margin-top: 10px;
+        }
+        .post-card-actions button {
+            margin-right: 10px;
+        }
+        .edit-btn {
+            background-color: #2ecc71;
+        }
+        .edit-btn:hover {
+            background-color: #27ae60;
+        }
+        .delete-btn {
+            background-color: #e74c3c;
+        }
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* --- Edit Modal Styling --- */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+        }
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>My Profile</h1>
+        <a href="/blog">&larr; Back to Blog</a>
+
+        <section id="create-section">
+            <h2>Create a New Post</h2>
+            <form id="create-post-form">
+                <input type="text" id="create-title" placeholder="Post Title" required>
+                <textarea id="create-content" placeholder="Write your post content here..." required></textarea>
+                <button type="submit">Create Post</button>
+            </form>
+        </section>
+
+        <section id="posts-section">
+            <h2>Your Posts</h2>
+            <div id="posts-container">
+                </div>
+        </section>
+    </div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2>Edit Post</h2>
+            <form id="edit-post-form">
+                <input type="hidden" id="edit-post-id">
+                <input type="text" id="edit-title" required>
+                <textarea id="edit-content" required></textarea>
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        // --- DOM Elements ---
+        const postsContainer = document.getElementById('posts-container');
+        const createForm = document.getElementById('create-post-form');
+        const editModal = document.getElementById('edit-modal');
+        const editForm = document.getElementById('edit-post-form');
+        const closeModalBtn = document.querySelector('.close-btn');
+
+        // --- Helper Function to Truncate Text ---
+        function truncateText(text, length = 150) {
+            if (text.length <= length) {
+                return text;
+            }
+            return text.substring(0, length) + '...';
+        }
+
+        // --- Renders Posts to the Page ---
+        function renderPosts(posts) {
+            postsContainer.innerHTML = ''; // Clear current posts
+            if (posts.length === 0) {
+                postsContainer.innerHTML = '<p>You haven\'t created any posts yet.</p>';
+                return;
+            }
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'post-card';
+                postCard.innerHTML = `
+                    <h3>${post.title}</h3>
+                    <p>${truncateText(post.content)}</p>
+                    <div class="post-card-actions">
+                        <button class="edit-btn" data-id="${post.id}" data-title="${encodeURIComponent(post.title)}" data-content="${encodeURIComponent(post.content)}">Edit</button>
+                        <button class="delete-btn" data-id="${post.id}">Delete</button>
+                    </div>
+                `;
+                postsContainer.appendChild(postCard);
+            });
+        }
+
+        // --- Main Function to Load the Profile Page ---
+        async function loadProfilePage() {
+            // 1. Check if user is logged in. If not, redirect to login page.
+            const authStatus = await fetch('/api/auth/status').then(res => res.json());
+            if (!authStatus.isLoggedIn) {
+                window.location.href = '/login.html';
+                return; // Stop execution
+            }
+
+            // 2. Fetch the user's personal posts
+            try {
+                const response = await fetch('/api/posts/me');
+                if (!response.ok) throw new Error('Failed to fetch posts.');
+                const posts = await response.json();
+                renderPosts(posts);
+            } catch (error) {
+                postsContainer.innerHTML = `<p style="color: red;">Error loading posts: ${error.message}</p>`;
+            }
+        }
+        
+        // --- Event Listener for Creating a Post ---
+        createForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('create-title').value;
+            const content = document.getElementById('create-content').value;
+
+            try {
+                const response = await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content })
+                });
+                if (!response.ok) throw new Error('Failed to create post.');
+                createForm.reset(); // Clear the form fields
+                loadProfilePage();  // Refresh the posts list
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        // --- Event Listeners for Edit and Delete buttons (using Event Delegation) ---
+        postsContainer.addEventListener('click', async (e) => {
+            // Handle Delete Button Click
+            if (e.target.classList.contains('delete-btn')) {
+                const postId = e.target.dataset.id;
+                if (confirm('Are you sure you want to delete this post?')) {
+                    try {
+                        const response = await fetch(`/api/posts/${postId}`, { method: 'DELETE' });
+                        if (!response.ok) throw new Error('Failed to delete post.');
+                        loadProfilePage(); // Refresh list
+                    } catch (error) {
+                        alert(`Error: ${error.message}`);
+                    }
+                }
+            }
+
+            // Handle Edit Button Click
+            if (e.target.classList.contains('edit-btn')) {
+                const postId = e.target.dataset.id;
+                const postTitle = decodeURIComponent(e.target.dataset.title);
+                const postContent = decodeURIComponent(e.target.dataset.content);
+
+                // Populate the modal form
+                document.getElementById('edit-post-id').value = postId;
+                document.getElementById('edit-title').value = postTitle;
+                document.getElementById('edit-content').value = postContent;
+                
+                // Show the modal
+                editModal.style.display = 'block';
+            }
+        });
+
+        // --- Event Listener for Saving Changes in Edit Modal ---
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('edit-post-id').value;
+            const title = document.getElementById('edit-title').value;
+            const content = document.getElementById('edit-content').value;
+
+            try {
+                const response = await fetch(`/api/posts/${id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content })
+                });
+                if (!response.ok) throw new Error('Failed to update post.');
+                editModal.style.display = 'none'; // Hide modal
+                loadProfilePage(); // Refresh list
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        // --- Event Listeners for Closing the Modal ---
+        closeModalBtn.addEventListener('click', () => {
+            editModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target == editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+
+        // --- Initial Page Load ---
+        document.addEventListener('DOMContentLoaded', loadProfilePage);
+
+    </script>
+</body>
+</html>
